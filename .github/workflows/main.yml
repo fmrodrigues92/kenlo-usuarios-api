@@ -1,1 +1,23 @@
+name: Deploy kenlo usuarios api
 
+on:
+  push:
+    branches:
+      - master
+  
+jobs:
+  build:
+    name: Build & Deploy
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v2
+      
+      - name: Update SHA
+        run: echo $GITHUB_SHA > $GITHUB_WORKSPACE/app/_meta
+
+      - name: Build Docker image
+        run: docker build -t registry.digitalocean.com/kenlo/digital-ocean-deploy:$(echo $GITHUB_SHA | head -c7) .
+
+    
