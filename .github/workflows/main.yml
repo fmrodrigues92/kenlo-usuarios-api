@@ -33,3 +33,6 @@ jobs:
 
       - name: Update deploy file
         run: TAG=$(echo $GITHUB_SHA | head -c7) && sed -i 's|<IMAGE>|registry.digitalocean.com/kenlo/digital-ocean-deploy:'${TAG}'|' $GITHUB_WORKSPACE/deployment.yml
+
+      - name: save deploy file
+        run: doctl kubernetes cluster kubeconfig save --expiry-seconds 300 kenlo-cluster
