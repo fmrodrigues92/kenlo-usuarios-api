@@ -1,0 +1,53 @@
+apiVersion: apps/v1
+kind: Deployment
+
+metadata:
+  name: kenlo-usuarios-api-deploy
+  labels:
+    app: kenlo-usuarios-api-deploy
+
+  spec:
+    replicas: 1
+    selector:
+      matchLabels:
+        app: kenlo-usuarios-api-deploy
+    strategy:
+      rollingUpdate:
+        maxSurge: 1
+        maxUnavailable: 1
+      minReadySeconds: 5
+      template:
+        metadata:
+          labels:
+            app: kenlo-usuarios-api-deploy
+        spec:
+          containers:
+          - name: kenlo
+            image: registry.digitalocean.com/kenlo/digital-ocean-deploy:latest
+            securityContext:
+              privileged: true
+            ports:
+            - name: http
+              containerPort: 3000
+              hostport: 80
+            resources:
+              requests:
+                cpu: "100m"
+              limits:
+                cpu: "100m"
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: kenlo-usuarios-api-deploy
+  labels:
+    app: kenlo-usuarios-api-deploy
+spec:
+  type: LoadBalancer
+  ports:
+  - name: http
+    protocol: TCP
+    port: 80
+    targetPort: 3000
+  selector:
+    app: kenlo-usuarios-api-deploy

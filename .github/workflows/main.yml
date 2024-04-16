@@ -30,3 +30,6 @@ jobs:
 
       - name: Push Docker image
         run: docker push registry.digitalocean.com/kenlo/digital-ocean-deploy:$(echo $GITHUB_SHA | head -c7)
+
+      - name: Update deploy file
+        run: TAG = $(echo $GITHUB_SHA | head -c7) && sed -i "s/latest/$TAG/g" deployment.yml
