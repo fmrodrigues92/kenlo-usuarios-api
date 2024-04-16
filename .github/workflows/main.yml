@@ -20,4 +20,13 @@ jobs:
       - name: Build Docker image
         run: docker build -t registry.digitalocean.com/kenlo/digital-ocean-deploy:$(echo $GITHUB_SHA | head -c7) .
 
-    
+      - name: install doctl
+        uses: digitalocean/action-doctl@v2
+        with:
+          token: ${{ secrets.DIGITALOCEAN_TOKEN }}
+
+      - name: Login docker
+        run: doctl registry login --expiry-seconds 300
+
+      - name: Push Docker image
+        run: docker push registry.digitalocean.com/kenlo/digital-ocean-deploy:$(echo $GITHUB_SHA | head -c7)
