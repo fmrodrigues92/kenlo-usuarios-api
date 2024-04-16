@@ -1,52 +1,25 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: kenlo-usuarios-api-deploy
-  labels:
-    app: kenlo-usuarios-api-deploy
+  name: kenlo-usuarios-api
 spec:
   replicas: 1
   selector:
     matchLabels:
-      app: kenlo-usuarios-api-deploy
-  strategy:
-    rollingUpdate:
-      maxSurge: 1
-      maxUnavailable: 1
-  minReadySeconds: 5
+      app: kenlo-usuarios-api
   template:
     metadata:
       labels:
-        app: kenlo-usuarios-api-deploy
+        app: kenlo-usuarios-api
     spec:
       containers:
-      - name: kenlo
-        image: <IMAGE>
-        securityContext:
-          privileged: true
+      - name: kenlo-usuarios-api
+        image: registry.digitalocean.com/kenlo/digital-ocean-deploy:<IMAGE_TAG>
         ports:
-        - name: http
-          containerPort: 3000
-        resources:
-          requests:
-            cpu: "100m"
-            memory: "128Mi"
-          limits:
-            memory: "256Mi"
-            cpu: "100m"
----
-apiVersion: v1
-kind: Service
-metadata:
-  name: kenlo-usuarios-api-deploy
-  labels:
-    app: kenlo-usuarios-api-deploy
-spec:
-  type: LoadBalancer
-  ports:
-  - name: http
-    protocol: TCP
-    port: 80
-    targetPort: 3000
-  selector:
-    app: kenlo-usuarios-api-deploy
+        - containerPort: 3000
+        env:
+        - name: MONGODB_URI
+          valueFrom:
+            secretKeyRef:
+              name: mongodb-secret
+              key: uri

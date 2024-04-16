@@ -1,0 +1,46 @@
+name: Deploy app DigitalOcean - usuarios-api
+
+on:
+  push:
+    branches:
+      - master
+
+jobs:
+  build:
+    name: Build and deploy
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout main
+        uses: actions/checkout@v2
+    
+      - name: Update SHA
+        run: echo $GITHUB_SHA > $GITHUB_WORKSPACE/app/_meta
+      
+      - name: Build image
+        run: docker build -t registry.digitalocean.com/kenlo/digital-ocean-deploy:$(echo $GITHUB_SHA | head -c7) .
+
+      - name: Install doctl
+        uses: digitalocean/action-doctl@v2
+        with:
+          token: ${{ secrets.DIGITALOCEAN_TOKEN }}
+      
+      - name: Login docker
+        run: doctl registry login --expiry-seconds 600
+      
+      - name: Push image
+        run: docker push registry.digitalocean.com/kenlo/digital-ocean-deploy:$(echo $GITHUB_SHA | head -c7)
+
+      - name: Update deploy file
+        run: |
+          TAG=$(echo $GITHUB_SHA | head -c7)
+          sed -i 's|<IMAGE>|registry.digitalocean.com/kenlo-usuarios-api/digital-ocean-deploy:'${TAG}'|' $GITHUB_WORKSPACE/config/deployment.yml
+
+      - name: Save config cluster
+        run: doctl kubernetes cluster kubeconfig save --expiry-seconds 600 kenlo-cluster
+
+      - name: Deploy
+        run: kubectl apply -f $GITHUB_WORKSPACE/config/deployment.yml
+      
+      - name: Verify deploy
+        run: kubectl rollout status deployment/kenlo-usuarios-api
