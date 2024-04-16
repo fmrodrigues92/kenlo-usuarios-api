@@ -23,7 +23,7 @@ metadata:
         spec:
           containers:
           - name: kenlo
-            image: registry.digitalocean.com/kenlo/digital-ocean-deploy:latest
+            image: <IMAGE>
             securityContext:
               privileged: true
             ports:
