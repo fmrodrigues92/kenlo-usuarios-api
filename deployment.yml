@@ -2,11 +2,18 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: kenlo-usuarios-api
+  labels:
+    app: kenlo-usuarios-api
 spec:
   replicas: 1
   selector:
     matchLabels:
       app: kenlo-usuarios-api
+  strategy:
+    rollingUpdate:
+      maxSurge: 1
+      maxUnavailable: 1
+  minReadySeconds: 5
   template:
     metadata:
       labels:
@@ -23,3 +30,26 @@ spec:
             secretKeyRef:
               name: mongodb-secret
               key: uri
+        resources:
+          requests:
+            cpu: "500m"
+            memory: "500Mi"
+          limits:
+            cpu: "1"
+            memory: "1Gi"
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: kenlo-usuarios-api
+  labels:
+    app: kenlo-usuarios-api
+spec:
+  type: LoadBalancer
+  ports:
+    - name: http
+      protocol: TCP
+      port: 80
+      targetPort: 3000
+  selector:
+    app: kenlo-usuarios-api
