@@ -36,3 +36,6 @@ jobs:
 
       - name: save deploy file
         run: doctl kubernetes cluster kubeconfig save --expiry-seconds 300 kenlo-cluster
+
+      - name: Deploy
+        run: kubectl apply -f $GITHUB_WORKSPACE/deployment.yml
